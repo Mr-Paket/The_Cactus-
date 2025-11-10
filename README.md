@@ -57,7 +57,7 @@
 ---
 
 ## ⚙️ Архитектура проекта
-    '''CactusFocus/
+    CactusFocus/
     ├── backend/                     # ASP.NET Core API
     │   ├── Controllers/
     │   ├── Models/
@@ -71,7 +71,7 @@
         │   │   ├── GrowingCactus.jsx
         │   │   └── Forest.jsx
         │   └── App.jsx
-        └── package.json'''
+        └── package.json
 ---
 
 ## 🧩 Основные API эндпоинты
