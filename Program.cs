@@ -206,7 +206,49 @@ namespace TheCactusApp
             }
         }
     }
-    
+
+    //Пикми кактус (от 3 сессии подряд)
+    public class PickmeCactus : Cactus
+    {
+        public PickmeCactus(int growthTime) : base("Миленький кактус", growthTime)
+        {
+        }
+
+        public override string Render()
+        {
+            if (Status == CactusStatus.Grown)
+            {
+                return @"
+    ‪❤︎
+   🎀🎀
+  /|♡|\
+ / | | \
+   |𖹭𖹭𖹭♡|
+  _|___|_
+ |_______|";
+            }
+            else if (Status == CactusStatus.Withered)
+            {
+                return @"
+    💫
+   💀✖
+  / \ \
+    | |
+   |___|
+  _|___|_
+ |_______|";
+            }
+            else
+            {
+                return @"
+    ♡ 🌱
+    |  |
+  __|__|__
+ |_______|";
+            }
+        }
+    }
+
     public class CactusGarden
     {
         private List<Cactus> cactuses;
@@ -270,6 +312,7 @@ namespace TheCactusApp
         private int failedSessionsCount;
         private int longestSessionMinutes;
         private int streakDays;
+        private int streakSessions;
         private DateTime? lastSessionDate;
         
         public int TotalFocusedMinutes
@@ -297,6 +340,11 @@ namespace TheCactusApp
             get { return streakDays; }
         }
 
+        public int StreakSessions
+        {
+            get { return streakSessions; }
+        }
+
         public DateTime? LastSessionDate
         {
             get { return lastSessionDate; }
@@ -309,6 +357,7 @@ namespace TheCactusApp
             failedSessionsCount = 0;
             longestSessionMinutes = 0;
             streakDays = 0;
+            streakSessions = 0;
             lastSessionDate = null;
         }
         
@@ -316,22 +365,24 @@ namespace TheCactusApp
         {
             totalFocusedMinutes += duration;
             successfulSessionsCount++;
+            streakSessions++;
             
             if (duration > longestSessionMinutes)
             {
                 longestSessionMinutes = duration;
             }
 
-            UpdateStreak();
+            UpdateDayStreak();
         }
         
         public void UpdateOnFail()
         {
             failedSessionsCount++;
-            UpdateStreak();
+            streakSessions = 0;
+            UpdateDayStreak();
         }
         
-        private void UpdateStreak()
+        private void UpdateDayStreak()
         {
             if (lastSessionDate == null)
             {
@@ -469,7 +520,7 @@ namespace TheCactusApp
             return false;
         }
         
-        public FocusSession StartNewSession(int duration, int streakDays)
+        public FocusSession StartNewSession(int duration, int streakDays, int streakSessions)
         {
             if (IsSessionRunning())
             {
@@ -477,8 +528,11 @@ namespace TheCactusApp
             }
             
             Cactus cactus;
-            
-            if (streakDays >= 1)
+            if (streakSessions >= 3)
+            {
+                cactus = new PickmeCactus(duration);
+            }
+            else if (streakDays >= 1)
             {
                 cactus = new EventCactus(duration);
             }
@@ -690,7 +744,7 @@ namespace TheCactusApp
                 return;
             }
             
-            FocusSession session = sessionManager.StartNewSession(duration, user.UserStatistics.StreakDays);
+            FocusSession session = sessionManager.StartNewSession(duration, user.UserStatistics.StreakDays, user.UserStatistics.StreakSessions);
             
             Console.WriteLine("\n Начинается сессия на {0} минут...", duration);
             Console.WriteLine("Растёт: {0}", session.AssignedCactus.Name);
